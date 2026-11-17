@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulk TikTok Video Download</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Bulk TikTok Video Download</h1>
+      <p class="desc">
+        Công cụ tải nhiều video TikTok cùng lúc: dán không giới hạn số link, tải
+        video không watermark chất lượng HD. Chạy được trên điện thoại và PC,
+        không cần đăng nhập.
+      </p>
+
+      <div class="panel">
+        <b style="font-size: 16px; color: #1877f2"
+          >✍️ Nội dung nối thêm vào tiêu đề gốc</b
+        >
+        <textarea
+          id="capSuffix"
+          class="cap"
+          style="height: 70px"
+          placeholder="Ví dụ: #memecat #catmeme — nối liền vào cuối tiêu đề gốc, cách 1 dấu cách"
+        ></textarea>
+        <div
+          class="row"
+          style="
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 15px;
+          "
+        >
+          <label style="cursor: pointer"
+            ><input
+              type="radio"
+              name="capMode"
+              id="capModeAppend"
+              value="append"
+              checked
+            />
+            ➕ Nối thêm (giữ hashtag cũ)</label
+          >
+          <label style="cursor: pointer"
+            ><input
+              type="radio"
+              name="capMode"
+              id="capModeReplace"
+              value="replace"
+            />
+            🔄 Thay thế hashtag cũ</label
+          >
+        </div>
+        <div class="hint" style="margin-top: 6px">
+          Ví dụ tiêu đề <code>hello #me #lam</code>, nhập
+          <code>#meme #memes</code>:<br />
+          ➕ Nối thêm → <code>hello #me #lam #meme #memes</code><br />
+          🔄 Thay thế → <code>hello #meme #memes</code> (chỉ thay khi nội dung
+          nhập có hashtag)
+        </div>
+        <div class="hint" style="margin-top: 6px">
+          Tự lưu lại cho lần sau. Sửa ở đây thì nội dung các video chưa sửa tay
+          cũng được cập nhật theo.
+        </div>
+      </div>
+      <button id="noteFab" type="button" title="Văn bản / link lưu sẵn">
+        📌
+      </button>
+
+      <div id="notePanel">
+        <div class="np-head">
+          <b>📌 Văn bản / link lưu sẵn</b>
+          <button id="noteClose" type="button" aria-label="Đóng">✕</button>
+        </div>
+        <div class="np-body">
+          <textarea
+            id="noteInput"
+            class="cap"
+            style="height: 70px; margin-top: 0"
+            placeholder="Ví dụ: https://example.com/link-luu-san (có thể xuống dòng)"
+          ></textarea>
+          <div class="row" style="margin-top: 8px">
+            <button class="btn-sm" id="noteSave" type="button">Lưu</button>
+          </div>
+          <div id="noteList"></div>
+        </div>
+      </div>
+
+      <div class="bk-row">
+        <button class="btn-sm ghost" id="bkExport" type="button">
+          ⬆ Xuất JSON
+        </button>
+        <button class="btn-sm ghost" id="bkImport" type="button">
+          ⬇ Nhập JSON
+        </button>
+        <input type="file" id="bkFile" accept=".json,application/json" hidden />
+      </div>
+      <div class="hint" id="bkMsg" style="margin-top: 6px"></div>
+
+      <textarea
+        id="links"
+        placeholder="Dán link TikTok vào đây, mỗi dòng một link..."
+      ></textarea>
+      <div class="meta">
+        <span id="counter">Entered 0 links</span>
+        <span class="meta-acts">
+          <a id="pasteClip">📥 Dán từ clipboard</a>
+          <a id="copyLinks">📋 Copy tất cả link</a>
+          <a id="clear">Clear all links</a>
+        </span>
+      </div>
+      <button class="btn-main" id="go">🔍 Lấy thông tin tất cả</button>
+      <div class="progress" id="progress"></div>
+
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
