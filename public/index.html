@@ -3,70 +3,343 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bulk TikTok Video Download</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Bulk TikTok Downloader & GIF to MP4</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="wrap">
-      <h1>Bulk TikTok Video Download</h1>
-      <p class="desc">
-        Công cụ tải nhiều video TikTok cùng lúc: dán không giới hạn số link, tải
-        video không watermark chất lượng HD. Chạy được trên điện thoại và PC,
-        không cần đăng nhập.
-      </p>
+      <nav class="tabs" role="tablist">
+        <button
+          class="tab-btn active"
+          id="tabBtnTikTok"
+          type="button"
+          role="tab"
+          aria-selected="true"
+        >
+          📥 Tải Video TikTok
+        </button>
+        <button
+          class="tab-btn"
+          id="tabBtnGif"
+          type="button"
+          role="tab"
+          aria-selected="false"
+        >
+          🎞️ Convert GIF to MP4
+        </button>
+      </nav>
 
-      <div class="panel">
-        <b style="font-size: 16px; color: #1877f2"
-          >✍️ Nội dung nối thêm vào tiêu đề gốc</b
-        >
+      <!-- ================= TAB 1: TIKTOK DOWNLOADER ================= -->
+      <section id="tabTikTok" class="tab-pane active">
+        <h1>Bulk TikTok Video Download</h1>
+        <p class="desc">
+          Công cụ tải nhiều video TikTok cùng lúc: dán không giới hạn số link,
+          tải video không watermark chất lượng HD. Chạy được trên điện thoại và
+          PC, không cần đăng nhập.
+        </p>
+
+        <div class="panel">
+          <b style="font-size: 16px; color: #1877f2"
+            >✍️ Nội dung nối thêm vào tiêu đề gốc</b
+          >
+          <textarea
+            id="capSuffix"
+            class="cap"
+            style="height: 70px"
+            placeholder="Ví dụ: #memecat #catmeme — nối liền vào cuối tiêu đề gốc, cách 1 dấu cách"
+          ></textarea>
+          <div
+            class="row"
+            style="
+              display: flex;
+              gap: 22px;
+              flex-wrap: wrap;
+              margin-top: 10px;
+              font-size: 15px;
+            "
+          >
+            <label style="cursor: pointer"
+              ><input
+                type="radio"
+                name="capMode"
+                id="capModeAppend"
+                value="append"
+                checked
+              />
+              ➕ Nối thêm (giữ hashtag cũ)</label
+            >
+            <label style="cursor: pointer"
+              ><input
+                type="radio"
+                name="capMode"
+                id="capModeReplace"
+                value="replace"
+              />
+              🔄 Thay thế hashtag cũ</label
+            >
+          </div>
+          <div class="hint" style="margin-top: 6px">
+            Ví dụ tiêu đề <code>hello #me #lam</code>, nhập
+            <code>#meme #memes</code>:<br />
+            ➕ Nối thêm → <code>hello #me #lam #meme #memes</code><br />
+            🔄 Thay thế → <code>hello #meme #memes</code> (chỉ thay khi nội dung
+            nhập có hashtag)
+          </div>
+          <div class="hint" style="margin-top: 6px">
+            Tự lưu lại cho lần sau. Sửa ở đây thì nội dung các video chưa sửa
+            tay cũng được cập nhật theo.
+          </div>
+        </div>
+
+        <div class="bk-row">
+          <button class="btn-sm ghost" id="bkExport" type="button">
+            ⬆ Xuất JSON
+          </button>
+          <button class="btn-sm ghost" id="bkImport" type="button">
+            ⬇ Nhập JSON
+          </button>
+          <input
+            type="file"
+            id="bkFile"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+        <div class="hint" id="bkMsg" style="margin-top: 6px"></div>
+
         <textarea
-          id="capSuffix"
-          class="cap"
-          style="height: 70px"
-          placeholder="Ví dụ: #memecat #catmeme — nối liền vào cuối tiêu đề gốc, cách 1 dấu cách"
+          id="links"
+          placeholder="Dán link TikTok vào đây, mỗi dòng một link..."
         ></textarea>
-        <div
-          class="row"
-          style="
-            display: flex;
-            gap: 22px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-            font-size: 15px;
-          "
-        >
-          <label style="cursor: pointer"
-            ><input
-              type="radio"
-              name="capMode"
-              id="capModeAppend"
-              value="append"
-              checked
-            />
-            ➕ Nối thêm (giữ hashtag cũ)</label
-          >
-          <label style="cursor: pointer"
-            ><input
-              type="radio"
-              name="capMode"
-              id="capModeReplace"
-              value="replace"
-            />
-            🔄 Thay thế hashtag cũ</label
-          >
+        <div class="meta">
+          <span id="counter">Entered 0 links</span>
+          <span class="meta-acts">
+            <a id="pasteClip">📥 Dán từ clipboard</a>
+            <a id="copyLinks">📋 Copy tất cả link</a>
+            <a id="clear">Clear all links</a>
+          </span>
         </div>
-        <div class="hint" style="margin-top: 6px">
-          Ví dụ tiêu đề <code>hello #me #lam</code>, nhập
-          <code>#meme #memes</code>:<br />
-          ➕ Nối thêm → <code>hello #me #lam #meme #memes</code><br />
-          🔄 Thay thế → <code>hello #meme #memes</code> (chỉ thay khi nội dung
-          nhập có hashtag)
+        <button class="btn-main" id="go">🔍 Lấy thông tin tất cả</button>
+        <div class="progress" id="progress"></div>
+
+        <div class="grid" id="grid"></div>
+      </section>
+
+      <!-- ================= TAB 2: GIF TO MP4 ================= -->
+      <section id="tabGif" class="tab-pane" hidden>
+        <h1>Convert GIF to MP4 (Chroma Key)</h1>
+        <p class="desc">
+          Chuyển ảnh động GIF từ máy tính hoặc link trực tiếp sang video MP4
+          chuẩn HD, tự động chọn màu nền không trùng nhân vật để tách nền Chroma
+          Key trên TikTok cực sạch.
+        </p>
+
+        <!-- Nguồn GIF -->
+        <div class="panel">
+          <b style="font-size: 16px; color: #1877f2">1. Chọn nguồn ảnh GIF</b>
+          <div class="gif-source-grid">
+            <label class="dropzone" id="gifDropzone" for="gifFile">
+              <input type="file" id="gifFile" accept="image/gif,.gif" hidden />
+              <span class="dz-icon">📁</span>
+              <span class="dz-title" id="gifFileName"
+                >Bấm chọn file .GIF hoặc kéo thả vào đây</span
+              >
+              <span class="dz-sub">Tối đa 20MB</span>
+            </label>
+
+            <div class="gif-url-box">
+              <label for="gifUrl" class="lbl-sm">Hoặc dán link ảnh GIF:</label>
+              <div class="row" style="margin-top: 6px">
+                <input
+                  type="url"
+                  id="gifUrl"
+                  placeholder="https://i.pinimg.com/originals/.../image.gif"
+                />
+                <button class="btn-sm" id="gifLoadUrl" type="button">
+                  Tải GIF
+                </button>
+              </div>
+              <div class="hint" style="margin-top: 8px">
+                Khi tải từ file hoặc link, hệ thống sẽ tự đo thời lượng 1 vòng
+                và quét màu nhân vật để đề xuất màu nền không trùng.
+              </div>
+            </div>
+          </div>
+          <div class="progress" id="gifStatus" style="margin-top: 8px"></div>
         </div>
-        <div class="hint" style="margin-top: 6px">
-          Tự lưu lại cho lần sau. Sửa ở đây thì nội dung các video chưa sửa tay
-          cũng được cập nhật theo.
+
+        <!-- Xem trước & Cấu hình -->
+        <div class="gif-workspace" id="gifWorkspace">
+          <!-- Cột trái: Preview -->
+          <div class="panel gif-preview-card">
+            <b style="font-size: 16px; color: #1877f2">Xem trước nền Chroma</b>
+            <div class="gif-stage" id="gifStage">
+              <img id="gifPreviewImg" alt="GIF Preview" hidden />
+              <div id="gifPlaceholder" class="gif-placeholder">
+                Chưa có GIF nào được tải
+              </div>
+            </div>
+            <div class="gif-meta-bar" id="gifMetaInfo">
+              Kích thước: — | Thời lượng 1 vòng: —
+            </div>
+            <div class="palette-wrap" id="gifPaletteWrap" hidden>
+              <div class="hint" style="margin: 0 0 6px">
+                Màu phát hiện trong ảnh GIF (hệ thống sẽ tránh các màu này):
+              </div>
+              <div class="palette-dots" id="gifPaletteDots"></div>
+            </div>
+          </div>
+
+          <!-- Cột phải: Màu Chroma Key & Loop / Giây -->
+          <div class="panel gif-controls-card">
+            <b style="font-size: 16px; color: #1877f2">2. Màu nền Chroma Key</b>
+            <div class="color-picker-row">
+              <input type="color" id="gifBgColor" value="#00FF00" />
+              <input
+                type="text"
+                id="gifBgHex"
+                value="#00FF00"
+                maxlength="7"
+                spellcheck="false"
+              />
+              <button class="btn-sm" id="gifAutoColor" type="button">
+                ✨ Tự chọn màu không trùng
+              </button>
+            </div>
+            <div class="hint" id="gifColorReason" style="margin-top: 6px">
+              Tải GIF lên để tự động chọn màu tương phản nhất với nhân vật.
+            </div>
+
+            <!-- Tùy chọn chế độ fill nền Chroma Key -->
+            <div class="sub-box">
+              <div class="lbl-sm">Chế độ đổ màu nền Chroma Key:</div>
+              <label class="radio-line">
+                <input
+                  type="radio"
+                  name="gifBgMode"
+                  value="transparent_only"
+                  checked
+                />
+                <span>
+                  <b>Chỉ đổ vào vùng trong suốt</b> (khuyên dùng cho GIF nền
+                  trong suốt, giữ nguyên 100% chi tiết bên trong nhân vật)
+                </span>
+              </label>
+              <label class="radio-line">
+                <input type="radio" name="gifBgMode" value="force_chroma" />
+                <span>
+                  <b>Ép thay màu nền gốc sang màu Chroma</b> (dùng khi GIF có
+                  nền đặc như nền trắng/đen quanh nhân vật)
+                </span>
+              </label>
+
+              <div id="forceChromaOpts" class="force-opts" hidden>
+                <div class="force-row">
+                  <span>Màu nền gốc cần thay:</span>
+                  <input type="color" id="gifKeySrcColor" value="#FFFFFF" />
+                  <button
+                    class="btn-sm ghost"
+                    id="gifPickCornerColor"
+                    type="button"
+                    style="padding: 6px 10px; font-size: 13px"
+                  >
+                    🎯 Lấy màu góc ảnh
+                  </button>
+                </div>
+                <div class="force-row" style="margin-top: 8px">
+                  <span>Độ mở vùng màu (Similarity):</span>
+                  <input
+                    type="range"
+                    id="gifKeySim"
+                    min="0.03"
+                    max="0.35"
+                    step="0.01"
+                    value="0.12"
+                  />
+                  <span id="gifKeySimVal">0.12</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="sep" />
+
+            <b style="font-size: 16px; color: #1877f2"
+              >3. Số lần lặp (Loop) & Thời lượng (Giây)</b
+            >
+            <div class="loop-sec-grid">
+              <div class="field-box">
+                <label for="gifLoops" class="lbl-sm"
+                  >Number of loop (vòng)</label
+                >
+                <input
+                  type="number"
+                  id="gifLoops"
+                  min="1"
+                  max="60"
+                  step="1"
+                  value="1"
+                />
+              </div>
+              <div class="sync-arrow">⇄</div>
+              <div class="field-box">
+                <label for="gifSeconds" class="lbl-sm">Thời lượng (giây)</label>
+                <input
+                  type="number"
+                  id="gifSeconds"
+                  min="0.2"
+                  max="180"
+                  step="0.1"
+                  value="1.0"
+                />
+              </div>
+            </div>
+            <div class="quick-sec-row">
+              <span class="hint" style="margin: 0">Chọn nhanh:</span>
+              <button type="button" class="chip-btn" data-sec="3">3s</button>
+              <button type="button" class="chip-btn" data-sec="5">5s</button>
+              <button type="button" class="chip-btn" data-sec="10">10s</button>
+              <button type="button" class="chip-btn" data-sec="15">15s</button>
+            </div>
+            <div class="hint" id="gifSyncHint" style="margin-top: 6px">
+              Nhập số giây sẽ tự tính số vòng lặp tương ứng (và ngược lại).
+            </div>
+
+            <button
+              class="btn-main"
+              id="gifConvertBtn"
+              type="button"
+              style="margin-top: 16px"
+            >
+              🎬 Chuyển sang MP4 & Tải về
+            </button>
+            <div class="progress" id="gifConvertStatus"></div>
+
+            <div id="gifResultBox" class="gif-result-box" hidden>
+              <video
+                id="gifResultVideo"
+                controls
+                loop
+                playsinline
+                style="
+                  width: 100%;
+                  max-height: 280px;
+                  border-radius: 10px;
+                  background: #000;
+                "
+              ></video>
+              <a
+                id="gifDownloadLink"
+                class="dl"
+                style="margin-top: 10px"
+                download="chroma.mp4"
+                >⬇️ Tải lại file MP4</a
+              >
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Nút & bảng ghi chú nổi (dùng chung) -->
       <button id="noteFab" type="button" title="Văn bản / link lưu sẵn">
         📌
       </button>
@@ -89,34 +362,6 @@
           <div id="noteList"></div>
         </div>
       </div>
-
-      <div class="bk-row">
-        <button class="btn-sm ghost" id="bkExport" type="button">
-          ⬆ Xuất JSON
-        </button>
-        <button class="btn-sm ghost" id="bkImport" type="button">
-          ⬇ Nhập JSON
-        </button>
-        <input type="file" id="bkFile" accept=".json,application/json" hidden />
-      </div>
-      <div class="hint" id="bkMsg" style="margin-top: 6px"></div>
-
-      <textarea
-        id="links"
-        placeholder="Dán link TikTok vào đây, mỗi dòng một link..."
-      ></textarea>
-      <div class="meta">
-        <span id="counter">Entered 0 links</span>
-        <span class="meta-acts">
-          <a id="pasteClip">📥 Dán từ clipboard</a>
-          <a id="copyLinks">📋 Copy tất cả link</a>
-          <a id="clear">Clear all links</a>
-        </span>
-      </div>
-      <button class="btn-main" id="go">🔍 Lấy thông tin tất cả</button>
-      <div class="progress" id="progress"></div>
-
-      <div class="grid" id="grid"></div>
     </div>
 
     <script src="script.js"></script>
