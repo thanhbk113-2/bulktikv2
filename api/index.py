@@ -2,6 +2,7 @@
 import io
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -14,6 +15,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from PIL import Image, ImageSequence
 from pydantic import BaseModel
+from starlette.background import BackgroundTask
 
 MAX_LINKS = 5
 MAX_GIF_BYTES = 20 * 1024 * 1024  # 20MB
@@ -402,7 +404,8 @@ async def gif_to_mp4(
         f"[bg][fg]overlay=shortest=1:format=auto,format=yuv420p[out]"
     )
 
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = tempfile.mkdtemp()
+    try:
         in_path = os.path.join(tmpdir, "input.gif")
         out_path = os.path.join(tmpdir, "output.mp4")
         with open(in_path, "wb") as f:
@@ -444,18 +447,16 @@ async def gif_to_mp4(
             err_msg = (proc.stderr or "Lỗi ffmpeg không xác định").strip()[:200]
             raise HTTPException(502, f"Chuyển đổi MP4 thất bại: {err_msg}")
 
-        with open(out_path, "rb") as f:
-            mp4_bytes = f.read()
-
-    safe_stem = re.sub(r"[^a-zA-Z0-9_-]+", "_", stem).strip("_") or "gif_chroma"
-    return Response(
-        mp4_bytes,
-        media_type="video/mp4",
-        headers={
-            "Content-Disposition": f'attachment; filename="{safe_stem}_{bg_hex}.mp4"',
-            "Content-Length": str(len(mp4_bytes)),
-        },
-    )
+        safe_stem = re.sub(r"[^a-zA-Z0-9_-]+", "_", stem).strip("_") or "gif_chroma"
+        return FileResponse(
+            out_path,
+            media_type="video/mp4",
+            filename=f"{safe_stem}_{bg_hex}.mp4",
+            background=BackgroundTask(shutil.rmtree, tmpdir, ignore_errors=True),
+        )
+    except Exception:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        raise
 
 
 @app.get("/")
