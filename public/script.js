@@ -90,25 +90,30 @@ $("copyLinks").onclick = async () => {
 };
 
 // ===== Gọi backend (yt-dlp trên Vercel) =====
-async function fetchInfo(url) {
+async function resolveBatch(urls) {
   let r, j;
   try {
     r = await fetch("/api/resolve", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ urls: [url] }),
+      body: JSON.stringify({ urls }),
     });
     j = await r.json().catch(() => ({}));
   } catch (e) {
     throw new Error("Không kết nối được máy chủ: " + e.message);
   }
   if (!r.ok) throw new Error(j.detail || `Máy chủ trả lỗi HTTP ${r.status}`);
-  const it = j.items && j.items[0];
+  return j.items || [];
+}
+
+async function fetchInfo(url) {
+  const items = await resolveBatch([url]);
+  const it = items[0];
   if (!it || !it.ok)
     throw new Error((it && it.error) || "Không lấy được video");
   return {
     id: it.id,
-    url,
+    url: it.url || url,
     title: it.title || "TikTok video",
     cover: it.thumbnail || "",
   };
@@ -308,16 +313,41 @@ $("go").onclick = async () => {
   $("grid").innerHTML = "";
   results = [];
 
-  for (let i = 0; i < links.length; i++) {
-    $("progress").textContent = `Đang xử lý ${i + 1}/${links.length}...`;
+  const BATCH_SIZE = 5;
+  const chunks = [];
+  for (let i = 0; i < links.length; i += BATCH_SIZE) {
+    chunks.push(links.slice(i, i + BATCH_SIZE));
+  }
+
+  let processedCount = 0;
+  for (let c = 0; c < chunks.length; c++) {
+    const chunk = chunks[c];
+    $("progress").textContent = `Đang xử lý ${processedCount + 1}–${Math.min(processedCount + chunk.length, links.length)}/${links.length}...`;
     try {
-      const info = await fetchInfo(links[i]);
-      results.push(info);
-      addCard(info);
+      const items = await resolveBatch(chunk);
+      for (const it of items) {
+        if (it && it.ok) {
+          const info = {
+            id: it.id,
+            url: it.url,
+            title: it.title || "TikTok video",
+            cover: it.thumbnail || "",
+          };
+          results.push(info);
+          addCard(info);
+        } else {
+          addError(it ? it.url : "", (it && it.error) || "Không lấy được video");
+        }
+      }
     } catch (e) {
-      addError(links[i], e.message);
+      for (const u of chunk) {
+        addError(u, e.message);
+      }
     }
-    await sleep(300);
+    processedCount += chunk.length;
+    if (c < chunks.length - 1) {
+      await sleep(300);
+    }
   }
 
   $("progress").textContent = `Xong: ${results.length}/${links.length} video.`;
