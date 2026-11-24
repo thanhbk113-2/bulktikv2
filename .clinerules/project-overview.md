@@ -1,0 +1,1 @@
+Xem `AGENTS.md` ở thư mục gốc để biết tổng quan dự án và quy tắc làm việc.
